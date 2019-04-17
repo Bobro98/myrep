@@ -1,0 +1,58 @@
+#!/bin/bash
+read -p "Podaj imię " imie
+read -p "podaj nazwsiko " nazwisko
+login=${imie:0:1}${nazwisko}
+login=${login,,}
+login=$(echo $login | sed 'y/ąćęłńóśżź/acelnoszz/')
+slogin=$login
+I=0
+flagA=1
+flagB=1
+while [ $flagA = 1 ]
+do
+flagB=1
+	for user in $(cat /etc/passwd)
+	do
+		user=$(echo "$user" | sed 's/:.*//');
+		#echo "user: " $user
+		#echo "login: " $login
+		if [ $login = $user ]
+		then
+			I=$[I+1]
+			login=$(echo $slogin$I)
+			flagB=0
+		fi
+	done
+	if [ $flagB = 1 ]
+	then
+	flagA=0;
+	fi
+done
+echo "Twoj login: " $login
+
+pass=$login
+sudo useradd -mp $(openssl passwd -1 $pass) $login -s /bin/bash
+sudo passwd -e $login
+sudo usermod -G sudo $login
+
+cd /home/$login
+sudo mkdir public_html
+cd /home/$login/public_html
+sudo mkdir private_html
+
+sudo htpasswd -b -c /home/$login/.htpasswd $login $pass
+sudo echo "AuthType Basic" >> /home/$login/public_html/private_html/.htaccess
+sudo echo "AuthName \"Password Protected Area\"" >> /home/$login/public_html/private_html/.htaccess
+sudo echo "AuthUserFile /home/$login/.htpasswd" >> /home/$login/public_html/private_html/.htaccess
+sudo echo "Require valid-user" >> /home/$login/public_html/private_html/.htaccess
+
+sudo echo "alias loo='cat /etc/passwd'" >> /home/$login/.bashrc
+sudo echo "alias cpuinf='cat /proc/cpuinfo'" >> /home/$login/.bashrc
+
+echo $login | sudo tee -a /etc/vsftpd.userlist
+
+sudo chown -R $login:$login /home/$login/public_html
+sudo chmod -R 0775 /home/$login/public_html
+sudo chown -R $login:$login /home/$login/public_html/private_html
+sudo chmod -R 0775 /home/$login/public_html/private_html
+echo "done"
