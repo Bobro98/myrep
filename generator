@@ -56,3 +56,6 @@ sudo chmod -R 0775 /home/$login/public_html
 sudo chown -R $login:$login /home/$login/public_html/private_html
 sudo chmod -R 0775 /home/$login/public_html/private_html
 echo "done"
+
+
+#edit for tst
