@@ -31,14 +31,17 @@ done
 echo "Twoj login: " $login
 
 pass=$login
-sudo useradd -mp $(openssl passwd -1 $pass) $login -s /bin/bash
+sudo useradd -mp $(openssl passwd -1 $pass) $login -s /bin/bash -g sb_user
 sudo passwd -e $login
+sudo groupadd $login
 sudo usermod -G sudo $login
 
 cd /home/$login
 sudo mkdir public_html
 cd /home/$login/public_html
 sudo mkdir private_html
+
+sudo smbpasswd -a $login
 
 sudo htpasswd -b -c /home/$login/.htpasswd $login $pass
 sudo echo "AuthType Basic" >> /home/$login/public_html/private_html/.htaccess
