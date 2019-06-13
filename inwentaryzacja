@@ -1,0 +1,9 @@
+#!/bin/bash
+mkdir inw_$(date +%F-%H:%M:%S)
+cd inw_$(date +%F-%H:%M:%S)
+cat /etc/passwd >> users.txt
+cat /etc/group >> groups.txt
+sudo iptables -L >> firewall.txt
+sudo netstat -plnt >> app.txt
+ps -aux >> procesy.txt
+
